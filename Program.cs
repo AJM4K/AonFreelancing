@@ -1,8 +1,14 @@
 
 using AonFreelancing.Contexts;
 using AonFreelancing.Models;
+using AonFreelancing.Utilities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace AonFreelancing
 {
@@ -22,6 +28,25 @@ namespace AonFreelancing
             builder.Services.AddIdentity<User,ApplicationRole>()
                 .AddEntityFrameworkStores<MainAppContext>()
                 .AddDefaultTokenProviders();
+
+
+
+            // Register JWT settings for dependency injection (bind it to the "JwtSettings" section of appsettings.json)
+            builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+
+            // JWT Authentication configuration
+
+
+            // Add Authentication (even if manually handling JWT validation)
+            _ = builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            });
+
+
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

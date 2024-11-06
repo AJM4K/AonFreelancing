@@ -29,5 +29,7 @@ namespace AonFreelancing.Contexts
             base.OnModelCreating(builder);
         }
 
+        public DbSet<Otp> Otps { get; set; }
+
     }
 }

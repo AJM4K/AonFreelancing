@@ -10,7 +10,7 @@ namespace AonFreelancing.Models.DTOs
         public string Title { get; set; }
         public string Description { get; set; }
 
-        public int ClientId { get; set; }//FK
+        public long ClientId { get; set; }//FK
 
         DateTime CreatedAt { get; set; }
     }

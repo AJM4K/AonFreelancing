@@ -55,10 +55,10 @@ namespace AonFreelancing.Controllers.Mobile.v1
                     Name = Req.Name,
                     UserName = Req.Username,
                     PhoneNumber = Req.PhoneNumber,
-                    Skills = "Programming, Net core 8, Communication"
+                    Skills = Req.Skills
                 };
             }
-            if (Req.UserType == Constants.USER_TYPE_FREELANCER)
+            if (Req.UserType == Constants.USER_TYPE_CLIENT)
             {
                 u = new Models.Client
                 {
@@ -464,6 +464,52 @@ namespace AonFreelancing.Controllers.Mobile.v1
                 }
             }));
         }
+
+
+        
+       [HttpGet("{id} /Profile")]
+ public async Task<IActionResult> GetProfileUser(long id)
+ {
+
+        var user = await _userManager.Users
+            .Where(u => u.Id == id)
+            .Select(u => new ProfileResponseDTO
+            {
+                Id = u.Id,
+                Name = u.Name,
+                Username = u.UserName,
+                PhoneNumber = u.PhoneNumber,
+                UserType = u.GetType().Name,
+                CompanyName = u is Client ? ((Client)u).CompanyName : null,
+                Skills = u is Freelancer ? ((Freelancer)u).Skills : null,
+            })
+            .FirstOrDefaultAsync();
+
+        if (user == null)
+        {
+            return Unauthorized(new ApiResponse<ProfileResponseDTO>
+            {
+                IsSuccess = false,
+                Results = null,
+                Errors = new List<Error>() {
+                    new Error(){
+                        Code = StatusCodes.Status401Unauthorized.ToString(),
+                        Message = "UnAuthorized"
+                    }
+                }
+            });
+        }
+
+        return Ok(new ApiResponse<ProfileResponseDTO>
+        {
+            IsSuccess = true,
+            Results = user,
+            Errors = { }
+        });
+
+
+
+
         // Helper function to generate JWT token
         private string GenerateJwtToken(User user)
         {

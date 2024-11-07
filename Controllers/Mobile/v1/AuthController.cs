@@ -267,54 +267,54 @@ namespace AonFreelancing.Controllers.Mobile.v1
                 }
 
 
- // This is a client
+                // This is a client
 
 
-                    var clientuser = await _mainAppContext.Users
-                        .OfType<Models.Client>()
-                        .Where(u => u.Id == user.Id)
-                        .FirstOrDefaultAsync();
+                var clientuser = await _mainAppContext.Users
+                    .OfType<Models.Client>()
+                    .Where(u => u.Id == user.Id)
+                    .FirstOrDefaultAsync();
 
-                    if (clientuser != null)
+                if (clientuser != null)
+                {
+
+                    ClientResponseDTO res = new ClientResponseDTO()
                     {
+                        Id = clientuser.Id,
+                        Name = clientuser.Name,
+                        Username = clientuser.UserName,
+                        PhoneNumber = clientuser.PhoneNumber,
+                        IsPhoneNumberVerified = clientuser.PhoneNumberConfirmed,
+                        UserType = Constants.USER_TYPE_CLIENT,
 
-                        ClientResponseDTO res = new ClientResponseDTO()
-                        {
-                            Id = clientuser.Id,
-                            Name = clientuser.Name,
-                            Username = clientuser.UserName,
-                            PhoneNumber = clientuser.PhoneNumber,
-                            IsPhoneNumberVerified = clientuser.PhoneNumberConfirmed,
-                            UserType = Constants.USER_TYPE_CLIENT,
+                        CompanyName = clientuser.CompanyName,
+                        Projects = _mainAppContext.Projects
+                            .Where(p => p.ClientId == clientuser.Id)
+                            .Select(p => new ProjectOutDTO()
+                            {
+                                Id = p.Id,
+                                Title = p.Title,
+                                Description = p.Description,
+                                ClientId = p.ClientId,
+                            })
+                    };
 
-                            CompanyName = clientuser.CompanyName,
-                            Projects = _mainAppContext.Projects
-                                .Where(p => p.ClientId == clientuser.Id)
-                                .Select(p => new ProjectOutDTO()
-                                {
-                                    Id = p.Id,
-                                    Title = p.Title,
-                                    Description = p.Description,
-                                    ClientId = p.ClientId,
-                                })
-                        };
+                    return Ok(new ApiLoginResponse<ClientResponseDTO>
+                    {
+                        IsSuccess = true,
+                        Errors = [],
+                        AccessToken = token,
+                        Results = res
+                    });
+                }
 
-                        return Ok(new ApiLoginResponse<ClientResponseDTO>
-                        {
-                            IsSuccess = true,
-                            Errors = [],
-                            AccessToken = token,
-                            Results = res
-                        });
-                    }
 
-                    
 
-                
-              
-                  
-                    return Unauthorized("Invalid user type.");
-               
+
+
+
+                return Unauthorized("Invalid user type.");
+
 
 
 
@@ -466,46 +466,47 @@ namespace AonFreelancing.Controllers.Mobile.v1
         }
 
 
-        
-       [HttpGet("{id} /Profile")]
- public async Task<IActionResult> GetProfileUser(long id)
- {
 
-        var user = await _userManager.Users
-            .Where(u => u.Id == id)
-            .Select(u => new ProfileResponseDTO
-            {
-                Id = u.Id,
-                Name = u.Name,
-                Username = u.UserName,
-                PhoneNumber = u.PhoneNumber,
-                UserType = u.GetType().Name,
-                CompanyName = u is Client ? ((Client)u).CompanyName : null,
-                Skills = u is Freelancer ? ((Freelancer)u).Skills : null,
-            })
-            .FirstOrDefaultAsync();
-
-        if (user == null)
+        [HttpGet("{id} /Profile")]
+        public async Task<IActionResult> GetProfileUser(long id)
         {
-            return Unauthorized(new ApiResponse<ProfileResponseDTO>
+
+            var user = await _userManager.Users
+                .Where(u => u.Id == id)
+                .Select(u => new ProfileResponseDTO
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Username = u.UserName,
+                    PhoneNumber = u.PhoneNumber,
+                    UserType = u.GetType().Name,
+                    CompanyName = u is Models.Client ? ((Models.Client)u).CompanyName : null,
+                    Skills = u is Freelancer ? ((Freelancer)u).Skills : null,
+                })
+                .FirstOrDefaultAsync();
+
+            if (user == null)
             {
-                IsSuccess = false,
-                Results = null,
-                Errors = new List<Error>() {
+                return Unauthorized(new ApiResponse<ProfileResponseDTO>
+                {
+                    IsSuccess = false,
+                    Results = null,
+                    Errors = new List<Error>() {
                     new Error(){
                         Code = StatusCodes.Status401Unauthorized.ToString(),
                         Message = "UnAuthorized"
                     }
                 }
+                });
+            }
+
+            return Ok(new ApiResponse<ProfileResponseDTO>
+            {
+                IsSuccess = true,
+                Results = user,
+                Errors = { }
             });
         }
-
-        return Ok(new ApiResponse<ProfileResponseDTO>
-        {
-            IsSuccess = true,
-            Results = user,
-            Errors = { }
-        });
 
 
 
@@ -534,5 +535,5 @@ namespace AonFreelancing.Controllers.Mobile.v1
         }
     }
 
-
+    
 }

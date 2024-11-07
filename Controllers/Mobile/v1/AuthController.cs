@@ -18,6 +18,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AonFreelancing.Controllers.Mobile.v1
 {
@@ -467,6 +468,7 @@ namespace AonFreelancing.Controllers.Mobile.v1
 
 
 
+        [Authorize]
         [HttpGet("{id} /Profile")]
         public async Task<IActionResult> GetProfileUser(long id)
         {
